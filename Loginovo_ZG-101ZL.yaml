@@ -28,21 +28,17 @@ blueprint:
       default: []
       selector:
         action: {}
-
 mode: single
 max_exceeded: silent
-
 trigger:
 - platform: event
   event_type: zha_event
   event_data:
     device_id: !input loginovo_button
-
 variables:
   toggle_action: !input toggle_action
   on_action: !input on_action
   off_action: !input off_action
-
 action:
 - variables:
     command: '{{ trigger.event.data.command }}'
