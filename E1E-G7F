@@ -1,0 +1,128 @@
+blueprint:
+  name: 'Sengled Smart Light Switch (Model: E1E-G7F) ZHA'
+  author: noblewolf
+  homeassistant:
+    min_version: 2021.2.1
+  description: Use your Sengled E1E-G7F four button zigbee remote on ZHA.
+  domain: automation
+  input:
+    remote:
+      name: Sengled Smart Light Switch
+      description: 'Sengled Smart Light Switch (Model: E1E-G7F)'
+      selector:
+        device:
+          integration: zha
+          manufacturer: sengled
+          model: E1E-G7F
+          multiple: false
+    on_short_press:
+      name: On Button Short Press
+      description: Actions to run when you do a short press of the "on" button.
+      default: []
+      selector:
+        action: {}
+    on_long_press:
+      name: On Button Long Press
+      description: Actions to run when you do a press and hold the "on" button.
+      default: []
+      selector:
+        action: {}
+    on_double_press:
+      name: On Button Double Press
+      description: Actions to run when you do a quick double press of the "on" button.
+      default: []
+      selector:
+        action: {}
+    off_short_press:
+      name: Off Button Short Press
+      description: Actions to run when you do a short press of the "off" button.
+      default: []
+      selector:
+        action: {}
+    off_long_press:
+      name: Off Button Long Press
+      description: Actions to run when you do a press and hold the "off" button.
+      default: []
+      selector:
+        action: {}
+    off_double_press:
+      name: Off Button Double Press
+      description: Actions to run when you do a quick double press of the "off" button.
+      default: []
+      selector:
+        action: {}
+    up_short_press:
+      name: Up Button Short Press
+      description: Actions to run when you do a short press of the "up" or "brighten"
+        button.
+      default: []
+      selector:
+        action: {}
+    up_long_press:
+      name: Up Button Long Press
+      description: Actions to run when you do a long press of the "up" or "brighten"
+        button. When you press and hold the remote always sends a single press then
+        the following will be "long" press until you release. This could be used to
+        increment in larger steps.
+      default: []
+      selector:
+        action: {}
+    down_short_press:
+      name: Down Button Short Press
+      description: Actions to run when you do a short press of the "down" or "dim"
+        button.
+      default: []
+      selector:
+        action: {}
+    down_long_press:
+      name: Down Button Long Press
+      description: Actions to run when you do a long press of the "down" or "dim"
+        button. When you press and hold the remote always sends a single press then
+        the following will be "long" press until you release. This could be used to
+        increment in larger steps.
+      default: []
+      selector:
+        action: {}
+  source_url: https://community.home-assistant.io/t/zha-sengled-smart-light-switch-e1e-g7f-with-complete-control-of-every-button/276776
+mode: parallel
+max_exceeded: silent
+trigger:
+- platform: event
+  event_type: zha_event
+  event_data:
+    device_id: !input remote
+action:
+- variables:
+    command: '{{ trigger.event.data.command }}'
+    value: '{{ trigger.event.data.args }}'
+- choose:
+  - conditions:
+    - '{{ command == ''on'' }}'
+    sequence: !input on_short_press
+  - conditions:
+    - '{{ command ==  ''on_double'' }}'
+    sequence: !input on_double_press
+  - conditions:
+    - '{{ command == ''on_long'' }}'
+    sequence: !input on_long_press
+  - conditions:
+    - '{{ command == ''off'' }}'
+    sequence: !input off_short_press
+  - conditions:
+    - '{{ command == ''off_double'' }}'
+    sequence: !input off_double_press
+  - conditions:
+    - '{{ command == ''off_long'' }}'
+    sequence: !input off_long_press
+  - conditions:
+    - '{{ command == ''step'' and value == [0,1,0] }}'
+    sequence: !input up_short_press
+  - conditions:
+    - '{{ command == ''step'' and value == [0,2,0] }}'
+    sequence: !input up_long_press
+  - conditions:
+    - '{{ command == ''step'' and value == [1,1,0] }}'
+    sequence: !input down_short_press
+  - conditions:
+    - '{{ command == ''step'' and value == [1,2,0] }}'
+    sequence: !input down_long_press
