@@ -6,10 +6,9 @@ blueprint:
     loginovo_button:
       name: Loginovo  ZG-101ZL Switch
       selector:
-        device:
+        entity:
           integration: mqtt
-          manufacturer: _TZ3000_ja5osu5g
-          model: TS004F
+          domain: sensor
 single_press:
       name: Single Press
       description: Action to run on single press
