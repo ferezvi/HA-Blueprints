@@ -1,54 +1,54 @@
 blueprint:
-  name: Loginovo ZG-101ZL Switch
+  name: Loginovo ZG-101ZL Switch (Zigbee2MQTT)
   description: Automate the  Loginovo ZG-101ZL Smart button
+  author: ferezvi
   domain: automation
+  source_url: https://github.com/ferezvi/HA-Blueprints/blob/main/Loginovo_ZG-101Z_Zigbee2mqtt.yaml
   input:
-    loginovo_button:
-      name: Loginovo  ZG-101ZL Switch
+    action_sensor:
+      name: Loginovo ZG-101ZL Switch
+      description: Zigbee2mqtt action sensor for Loginovo ZG-101ZL SwitchF
       selector:
-        device:
-          integration: zha
-          manufacturer: _TZ3000_ja5osu5g
-          model: TS004F
-    toggle_action:
+        entity:
+          integration: mqtt
+          domain: sensor
+          multiple: false
+    single_action:
       name: Single Press
-      description: Action to run on single press
+      description: Action to run
       default: []
       selector:
         action: {}
-    on_action:
-      name: Double Press
-      description: Action to run on double press
+    double_action:
+      name: Double press
+      description: Action to run
       default: []
       selector:
         action: {}
-    off_action:
-      name: Long Press
-      description: Action to run on long press
+    hold_action:
+      name: long press
+      description: Action to run
       default: []
       selector:
         action: {}
-mode: single
+mode: restart
 max_exceeded: silent
 trigger:
-- platform: event
-  event_type: zha_event
-  event_data:
-    device_id: !input loginovo_button
-variables:
-  toggle_action: !input toggle_action
-  on_action: !input on_action
-  off_action: !input off_action
+  platform: state
+  entity_id: !input action_sensor
+condition:
+  - condition: template
+    value_template: '{{ trigger.to_state.state in ("single","double","hold") }}'
 action:
-- variables:
-    command: '{{ trigger.event.data.command }}'
-- choose:
-  - conditions:
-    - '{{ command == "toggle" }}'
-    sequence: !input toggle_action
-  - conditions:
-    - '{{ command == "on" }}'
-    sequence: !input on_action
-  - conditions:
-    - '{{ command == "off" }}'
-    sequence: !input off_action
+  - variables:
+      command: "{{ trigger.to_state.state }}"
+  - choose:
+      - conditions:
+          - "{{ command == 'single' }}"
+        sequence: !input single_action
+      - conditions:
+          - "{{ command == 'double' }}"
+        sequence: !input double_action
+      - conditions:
+          - "{{ command == 'hold' }}"
+        sequence: !input hold_action
