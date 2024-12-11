@@ -1,0 +1,54 @@
+blueprint:
+  name: Loginovo ZG-101ZL Switch
+  description: Automate the  Loginovo ZG-101ZL Smart button
+  domain: automation
+  input:
+    loginovo_button:
+      name: Loginovo  ZG-101ZL Switch
+      selector:
+        device:
+          integration: mqtt
+          manufacturer: _TZ3000_ja5osu5g
+          model: TS004F
+    toggle_action:
+      name: Single Press
+      description: Action to run on single press
+      default: []
+      selector:
+        action: {}
+    on_action:
+      name: Double Press
+      description: Action to run on double press
+      default: []
+      selector:
+        action: {}
+    off_action:
+      name: Long Press
+      description: Action to run on long press
+      default: []
+      selector:
+        action: {}
+mode: single
+max_exceeded: silent
+trigger:
+- platform: event
+  event_type: zha_event
+  event_data:
+    device_id: !input loginovo_button
+variables:
+  toggle_action: !input toggle_action
+  on_action: !input on_action
+  off_action: !input off_action
+action:
+- variables:
+    command: '{{ trigger.event.data.command }}'
+- choose:
+  - conditions:
+    - '{{ command == "toggle" }}'
+    sequence: !input toggle_action
+  - conditions:
+    - '{{ command == "on" }}'
+    sequence: !input on_action
+  - conditions:
+    - '{{ command == "off" }}'
+    sequence: !input off_action
