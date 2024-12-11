@@ -1,50 +1,54 @@
 blueprint:
-  name: Zigbee2MQTT - Sonoff SNZB-01 Zigbee Wireless Switch
-  description: Automate your Sonoff SNZB-01 Zigbee Wireless Switch via Zigbee2MQTT.
+  name: Loginovo ZG-101ZL Switch
+  description: Automate the  Loginovo ZG-101ZL Smart button
   domain: automation
   input:
-    switch:
-      name: Sonoff SNZB-01 Zigbee Wireless Switch
-      description: Sonoff SNZB-01 Zigbee Wireless Switch to use
+    loginovo_button:
+      name: Loginovo  ZG-101ZL Switch
       selector:
-        entity:
-          integration: mqtt
-          domain: sensor
-    single_press:
+        device:
+          integration: zha
+          manufacturer: _TZ3000_ja5osu5g
+          model: TS004F
+    toggle_action:
       name: Single Press
       description: Action to run on single press
       default: []
       selector:
         action: {}
-    double_press:
+    on_action:
       name: Double Press
       description: Action to run on double press
       default: []
       selector:
         action: {}
-    long_press:
+    off_action:
       name: Long Press
-      description: Action to run on long press (4 seconds)
+      description: Action to run on long press
       default: []
       selector:
         action: {}
-  source_url: https://github.com/AramidX/ha-blueprint/blob/dc4b846bc4dfa8725526606b07c051947bfc9687/blueprints/sonoff/sonoff_snzb01_wireless_switch_z2m.yaml
-mode: restart
+mode: single
 max_exceeded: silent
 trigger:
-- platform: state
-  entity_id: !input "switch"
-  attribute: action
+- platform: event
+  event_type: zha_event
+  event_data:
+    device_id: !input loginovo_button
+variables:
+  toggle_action: !input toggle_action
+  on_action: !input on_action
+  off_action: !input off_action
 action:
 - variables:
-    command: "{{ trigger.to_state.state }}"
+    command: '{{ trigger.event.data.command }}'
 - choose:
-  - conditions: 
-    - "{{ command == 'single' }}"
-    sequence: !input "single_press"
-  - conditions: 
-    - "{{ command == 'double' }}"
-    sequence: !input "double_press"
-  - conditions: 
-    - "{{ command == 'long' }}"
-    sequence: !input "long_press"
+  - conditions:
+    - '{{ command == "toggle" }}'
+    sequence: !input toggle_action
+  - conditions:
+    - '{{ command == "on" }}'
+    sequence: !input on_action
+  - conditions:
+    - '{{ command == "off" }}'
+    sequence: !input off_action
