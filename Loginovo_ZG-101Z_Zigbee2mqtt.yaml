@@ -12,6 +12,7 @@ blueprint:
         entity:
           integration: mqtt
           domain: sensor
+          domain: switch
           multiple: false
     single_action:
       name: Single Press
