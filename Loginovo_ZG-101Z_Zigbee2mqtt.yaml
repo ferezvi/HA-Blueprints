@@ -14,8 +14,7 @@ blueprint:
           domain: sensor
           domain: switch
           domain: binary_sensor
-          domain: automation
-          multiple: True
+          multiple: False
     single_action:
       name: Single Press
       description: Action to run
