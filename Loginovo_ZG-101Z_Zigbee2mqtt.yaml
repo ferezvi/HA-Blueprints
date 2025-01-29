@@ -1,6 +1,6 @@
 blueprint:
   name: Loginovo ZG-101ZL Switch (Zigbee2MQTT)
-  description: Automate the  Loginovo ZG-101ZL Smart button
+  description: Automate the ZG-101ZL Smart button
   author: ferezvi
   domain: automation
   source_url: https://github.com/ferezvi/HA-Blueprints/blob/main/Loginovo_ZG-101Z_Zigbee2mqtt.yaml
