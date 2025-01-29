@@ -13,7 +13,9 @@ blueprint:
           integration: mqtt
           domain: sensor
           domain: switch
-          multiple: false
+          domain: binary_sensor
+          domain: automation
+          multiple: True
     single_action:
       name: Single Press
       description: Action to run
