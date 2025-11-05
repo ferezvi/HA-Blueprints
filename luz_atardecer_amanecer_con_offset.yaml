@@ -1,14 +1,16 @@
 blueprint:
-  name: 🌅 Luz con Desfase Solar o Hora Fija
-  description: Automatización flexible que enciende y apaga luces usando eventos solares (con desfase) o a horas fijas.
+  name: 🌅 Luz/Switch con Desfase Solar o Hora Fija
+  description: Automatización flexible que enciende y apaga luces o switches usando eventos solares (con desfase) o a horas fijas.
   domain: automation
   input:
     light_entity:
-      name: Entidad de Luz a Controlar
-      description: La luz o grupo de luces que quieres automatizar.
+      name: Entidad a Controlar
+      description: La luz, switch o grupo que quieres automatizar.
       selector:
         entity:
-          domain: light
+          domain:
+            - light
+            - switch
     
     turn_on_trigger_type:
       name: Tipo de Encendido
@@ -103,7 +105,7 @@ action:
                   - condition: template
                     value_template: "{{ turn_on_type == 'time' }}"
         sequence:
-          - service: light.turn_on
+          - service: homeassistant.turn_on
             target:
               entity_id: !input light_entity
             
@@ -123,7 +125,7 @@ action:
                   - condition: template
                     value_template: "{{ turn_off_type == 'time' }}"
         sequence:
-          - service: light.turn_off
+          - service: homeassistant.turn_off
             target:
               entity_id: !input light_entity
     default: []
