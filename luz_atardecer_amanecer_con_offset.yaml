@@ -25,14 +25,14 @@ blueprint:
           
     sunset_offset:
       name: Desfase para el Atardecer (Encendido)
-      description: 'Desfase opcional para el atardecer. Ej: -00:15:00 antes, 00:20:00 después.'
+      description: Desfase opcional para el atardecer. Ejemplo -00:15:00 para antes o 00:20:00 para después.
       default: "00:00:00"
       selector:
         text:
         
     turn_on_time:
       name: Hora Fija de Encendido (Solo si seleccionaste Hora Fija)
-      description: Hora a la que la luz se debe encender (Ej: 18:30:00).
+      description: Hora a la que la luz se debe encender. Ejemplo 18:30:00
       default: "18:00:00"
       selector:
         time:
@@ -51,14 +51,14 @@ blueprint:
           
     sunrise_offset:
       name: Desfase para el Amanecer (Apagado)
-      description: 'Desfase opcional para el amanecer. Ej: 00:10:00 después, -00:05:00 antes.'
+      description: Desfase opcional para el amanecer. Ejemplo 00:10:00 para después o -00:05:00 para antes.
       default: "00:00:00"
       selector:
         text:
         
     turn_off_time:
       name: Hora Fija de Apagado (Solo si seleccionaste Hora Fija)
-      description: Hora a la que la luz se debe apagar (Ej: 23:00:00).
+      description: Hora a la que la luz se debe apagar. Ejemplo 23:00:00
       default: "23:00:00"
       selector:
         time:
