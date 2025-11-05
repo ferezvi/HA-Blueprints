@@ -1,15 +1,17 @@
 blueprint:
-  name: 🌅 Luz con Desfase Solar o Hora Fija
-  description: Automatización flexible que enciende y apaga luces usando eventos solares (con desfase) o a horas fijas.
+  name: 🌅 Luz/Switch con Desfase Solar o Hora Fija
+  description: Automatización flexible que enciende y apaga luces o switches usando eventos solares (con desfase) o a horas fijas.
   domain: automation
-  source_url: 
   input:
-    light_entity:
-      name: Entidad de Luz a Controlar
-      description: La luz o grupo de luces que quieres automatizar.
+    target_entities:
+      name: Entidades a Controlar
+      description: Luces, switches o grupos que quieres automatizar (puedes seleccionar múltiples).
       selector:
-        entity:
-          domain: light
+        target:
+          entity:
+            domain:
+              - light
+              - switch
     
     turn_on_trigger_type:
       name: Tipo de Encendido
@@ -25,15 +27,14 @@ blueprint:
           
     sunset_offset:
       name: Desfase para el Atardecer (Encendido)
-      # ⚠️ Descripción más corta para evitar el error de YAML
-      description: 'Desfase opcional (-HH:MM:SS) para el atardecer. Ej: -00:15:00 antes, 00:20:00 después.'
-      default: ""
+      description: Desfase opcional para el atardecer. Ejemplo -00:15:00 para antes o 00:20:00 para después.
+      default: "00:00:00"
       selector:
         text:
-
+        
     turn_on_time:
       name: Hora Fija de Encendido (Solo si seleccionaste Hora Fija)
-      description: Hora a la que la luz se debe encender (Ej: 18:30:00).
+      description: Hora a la que se debe encender. Ejemplo 18:30:00
       default: "18:00:00"
       selector:
         time:
@@ -49,39 +50,42 @@ blueprint:
             - label: Hora Fija (Time)
               value: time
           mode: list
-
+          
     sunrise_offset:
       name: Desfase para el Amanecer (Apagado)
-      # ⚠️ Descripción más corta para evitar el error de YAML
-      description: 'Desfase opcional (-HH:MM:SS) para el amanecer. Ej: 00:10:00 después, -00:05:00 antes.'
-      default: ""
+      description: Desfase opcional para el amanecer. Ejemplo 00:10:00 para después o -00:05:00 para antes.
+      default: "00:00:00"
       selector:
         text:
-
+        
     turn_off_time:
       name: Hora Fija de Apagado (Solo si seleccionaste Hora Fija)
-      description: Hora a la que la luz se debe apagar (Ej: 23:00:00).
+      description: Hora a la que se debe apagar. Ejemplo 23:00:00
       default: "23:00:00"
       selector:
         time:
+
+variables:
+  turn_on_type: !input turn_on_trigger_type
+  turn_off_type: !input turn_off_trigger_type
         
 trigger:
   - platform: sun
     event: sunset
-    offset: !input 'sunset_offset'
+    offset: !input sunset_offset
     id: "encendido_atardecer"
     
   - platform: time
-    at: !input 'turn_on_time'
+    at: !input turn_on_time
     id: "encendido_hora_fija"
-
+    
   - platform: sun
     event: sunrise
-    offset: !input 'sunrise_offset'
+    offset: !input sunrise_offset
     id: "apagado_amanecer"
     
   - platform: time
-    at: !input 'turn_off_time'
+    at: !input turn_off_time
     id: "apagado_hora_fija"
 
 action:
@@ -91,33 +95,38 @@ action:
             conditions:
               - condition: and
                 conditions:
-                  - '{{ trigger.id == "encendido_atardecer" }}'
-                  - '{{ trigger_input.turn_on_trigger_type == "sunset" }}'
+                  - condition: trigger
+                    id: "encendido_atardecer"
+                  - condition: template
+                    value_template: "{{ turn_on_type == 'sunset' }}"
               - condition: and
                 conditions:
-                  - '{{ trigger.id == "encendido_hora_fija" }}'
-                  - '{{ trigger_input.turn_on_trigger_type == "time" }}'
+                  - condition: trigger
+                    id: "encendido_hora_fija"
+                  - condition: template
+                    value_template: "{{ turn_on_type == 'time' }}"
         sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input 'light_entity'
-            data: {}
+          - service: homeassistant.turn_on
+            target: !input target_entities
             
       - conditions:
           - condition: or
             conditions:
               - condition: and
                 conditions:
-                  - '{{ trigger.id == "apagado_amanecer" }}'
-                  - '{{ trigger_input.turn_off_trigger_type == "sunrise" }}'
+                  - condition: trigger
+                    id: "apagado_amanecer"
+                  - condition: template
+                    value_template: "{{ turn_off_type == 'sunrise' }}"
               - condition: and
                 conditions:
-                  - '{{ trigger.id == "apagado_hora_fija" }}'
-                  - '{{ trigger_input.turn_off_trigger_type == "time" }}'
+                  - condition: trigger
+                    id: "apagado_hora_fija"
+                  - condition: template
+                    value_template: "{{ turn_off_type == 'time' }}"
         sequence:
-          - service: light.turn_off
-            target:
-              entity_id: !input 'light_entity'
-            data: {}
+          - service: homeassistant.turn_off
+            target: !input target_entities
     default: []
+    
 mode: single
