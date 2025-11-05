@@ -2,7 +2,7 @@ blueprint:
   name: 🌅 Luz con Desfase Solar o Hora Fija
   description: Enciende una luz/grupo de luces al atardecer (con desfase) o a hora fija, y la apaga al amanecer (con desfase) o a otra hora fija.
   domain: automation
-  source_url: # URL si lo compartes
+  source_url: 
   input:
     light_entity:
       name: Entidad de Luz a Controlar
@@ -25,7 +25,8 @@ blueprint:
           
     sunset_offset:
       name: Desfase para el Atardecer (Encendido)
-      description: Desfase opcional para el atardecer (Formato: -HH:MM:SS). Ej: -00:15:00 para 15 min. antes, 00:20:00 para 20 min. después.
+      # ⚠️ Corregido con comillas simples
+      description: 'Desfase opcional para el atardecer (Formato: -HH:MM:SS). Ej: -00:15:00 para 15 min. antes, 00:20:00 para 20 min. después.'
       default: ""
       selector:
         text:
@@ -51,7 +52,8 @@ blueprint:
 
     sunrise_offset:
       name: Desfase para el Amanecer (Apagado)
-      description: Desfase opcional para el amanecer (Formato: HH:MM:SS). Ej: 00:10:00 para 10 min. después. Usa "-" para antes.
+      # ⚠️ Corregido con comillas simples
+      description: 'Desfase opcional para el amanecer (Formato: HH:MM:SS). Ej: 00:10:00 para 10 min. después. Usa "-" para antes.'
       default: ""
       selector:
         text:
@@ -67,7 +69,7 @@ trigger:
   # Disparador de Atardecer (con Desfase)
   - platform: sun
     event: sunset
-    offset: !input 'sunset_offset' # <-- MODIFICADO
+    offset: !input 'sunset_offset'
     id: "encendido_atardecer"
     
   - platform: time
@@ -77,7 +79,7 @@ trigger:
   # Disparador de Amanecer (con Desfase)
   - platform: sun
     event: sunrise
-    offset: !input 'sunrise_offset' # <-- MODIFICADO
+    offset: !input 'sunrise_offset'
     id: "apagado_amanecer"
     
   - platform: time
@@ -90,12 +92,12 @@ action:
       - conditions:
           - condition: or
             conditions:
-              # Encendido al Atardecer
+              # Condición: Encendido al Atardecer (cuando se activó el trigger solar Y el usuario eligió 'sunset')
               - condition: and
                 conditions:
                   - '{{ trigger.id == "encendido_atardecer" }}'
                   - '{{ trigger_input.turn_on_trigger_type == "sunset" }}'
-              # Encendido a Hora Fija
+              # Condición: Encendido a Hora Fija (cuando se activó el trigger de hora Y el usuario eligió 'time')
               - condition: and
                 conditions:
                   - '{{ trigger.id == "encendido_hora_fija" }}'
@@ -110,12 +112,12 @@ action:
       - conditions:
           - condition: or
             conditions:
-              # Apagado al Amanecer
+              # Condición: Apagado al Amanecer
               - condition: and
                 conditions:
                   - '{{ trigger.id == "apagado_amanecer" }}'
                   - '{{ trigger_input.turn_off_trigger_type == "sunrise" }}'
-              # Apagado a Hora Fija
+              # Condición: Apagado a Hora Fija
               - condition: and
                 conditions:
                   - '{{ trigger.id == "apagado_hora_fija" }}'
