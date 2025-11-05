@@ -2,7 +2,6 @@ blueprint:
   name: 🌅 Luz con Desfase Solar o Hora Fija
   description: Automatización flexible que enciende y apaga luces usando eventos solares (con desfase) o a horas fijas.
   domain: automation
-  source_url: 
   input:
     light_entity:
       name: Entidad de Luz a Controlar
