@@ -1,0 +1,129 @@
+blueprint:
+  name: 🌅 Luz con Desfase Solar o Hora Fija
+  description: Enciende una luz/grupo de luces al atardecer (con desfase) o a hora fija, y la apaga al amanecer (con desfase) o a otra hora fija.
+  domain: automation
+  source_url: # URL si lo compartes
+  input:
+    light_entity:
+      name: Entidad de Luz a Controlar
+      description: La luz o grupo de luces que quieres automatizar.
+      selector:
+        entity:
+          domain: light
+    
+    turn_on_trigger_type:
+      name: Tipo de Encendido
+      description: ¿Quieres encender la luz al atardecer (sunset) o a una hora específica (time)?
+      selector:
+        select:
+          options:
+            - label: Atardecer (Sunset)
+              value: sunset
+            - label: Hora Fija (Time)
+              value: time
+          mode: list
+          
+    sunset_offset:
+      name: Desfase para el Atardecer (Encendido)
+      description: Desfase opcional para el atardecer (Formato: -HH:MM:SS). Ej: -00:15:00 para 15 min. antes, 00:20:00 para 20 min. después.
+      default: ""
+      selector:
+        text:
+
+    turn_on_time:
+      name: Hora Fija de Encendido (Solo si seleccionaste Hora Fija)
+      description: Hora a la que la luz se debe encender (Ej: 18:30:00).
+      default: "18:00:00"
+      selector:
+        time:
+    
+    turn_off_trigger_type:
+      name: Tipo de Apagado
+      description: ¿Quieres apagar la luz al amanecer (sunrise) o a una hora específica (time)?
+      selector:
+        select:
+          options:
+            - label: Amanecer (Sunrise)
+              value: sunrise
+            - label: Hora Fija (Time)
+              value: time
+          mode: list
+
+    sunrise_offset:
+      name: Desfase para el Amanecer (Apagado)
+      description: Desfase opcional para el amanecer (Formato: HH:MM:SS). Ej: 00:10:00 para 10 min. después. Usa "-" para antes.
+      default: ""
+      selector:
+        text:
+
+    turn_off_time:
+      name: Hora Fija de Apagado (Solo si seleccionaste Hora Fija)
+      description: Hora a la que la luz se debe apagar (Ej: 23:00:00).
+      default: "23:00:00"
+      selector:
+        time:
+        
+trigger:
+  # Disparador de Atardecer (con Desfase)
+  - platform: sun
+    event: sunset
+    offset: !input 'sunset_offset' # <-- MODIFICADO
+    id: "encendido_atardecer"
+    
+  - platform: time
+    at: !input 'turn_on_time'
+    id: "encendido_hora_fija"
+
+  # Disparador de Amanecer (con Desfase)
+  - platform: sun
+    event: sunrise
+    offset: !input 'sunrise_offset' # <-- MODIFICADO
+    id: "apagado_amanecer"
+    
+  - platform: time
+    at: !input 'turn_off_time'
+    id: "apagado_hora_fija"
+
+action:
+  - choose:
+      # --- Opción de Encendido ---
+      - conditions:
+          - condition: or
+            conditions:
+              # Encendido al Atardecer
+              - condition: and
+                conditions:
+                  - '{{ trigger.id == "encendido_atardecer" }}'
+                  - '{{ trigger_input.turn_on_trigger_type == "sunset" }}'
+              # Encendido a Hora Fija
+              - condition: and
+                conditions:
+                  - '{{ trigger.id == "encendido_hora_fija" }}'
+                  - '{{ trigger_input.turn_on_trigger_type == "time" }}'
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input 'light_entity'
+            data: {}
+            
+      # --- Opción de Apagado ---
+      - conditions:
+          - condition: or
+            conditions:
+              # Apagado al Amanecer
+              - condition: and
+                conditions:
+                  - '{{ trigger.id == "apagado_amanecer" }}'
+                  - '{{ trigger_input.turn_off_trigger_type == "sunrise" }}'
+              # Apagado a Hora Fija
+              - condition: and
+                conditions:
+                  - '{{ trigger.id == "apagado_hora_fija" }}'
+                  - '{{ trigger_input.turn_off_trigger_type == "time" }}'
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: !input 'light_entity'
+            data: {}
+    default: []
+mode: single
